@@ -1,0 +1,23 @@
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: xbsc-alerts
+  #namespace: default
+spec:
+  #summary: "XPC Services & Capabilties GitOps Notification"
+  providerRef:
+    name: xbsc-slack-provider
+  eventSeverity: error
+  eventSources:
+    - kind: GitRepository
+      name: '*'
+      namespace: "flux-system"
+    - kind: Kustomization
+      name: '*'
+      namespace: "flux-system"
+    - kind: HelmRepository
+      name: '*'
+      namespace: "istio-system"
+    - kind: HelmRelease
+      name: '*'
+      namespace: "istio-system"

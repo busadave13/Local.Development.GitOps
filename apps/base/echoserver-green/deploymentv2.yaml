@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echoserver
+  labels:
+    app: echoserver
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 0
+  progressDeadlineSeconds: 600
+  selector:
+    matchLabels:
+      app: echoserver
+  template:
+    metadata:
+      labels:
+        app: echoserver
+      annotations:
+        xbs-type: "frontdoor"
+        # Outbound port exclusion is required to avoid connectivity issues with Redis due to conflicts with Istio/Envoy
+        # https://docs.microsoft.com/en-us/azure/azure-cache-for-redis/cache-best-practices-kubernetes#potential-connection-collision-with-istioenvoy
+        traffic.sidecar.istio.io/excludeOutboundPorts: "15000,15001,15002,15003,15004,15005,15006,15007,15008,15009,15010,15011,15012,15013,15014,15015,15016,15017,15018,15019,15020,15021"
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: role
+                  operator: In
+                  values:
+                  - echoserver
+              topologyKey: kubernetes.io/hostname
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: role
+                  operator: NotIn
+                  values:
+                  - echoserver
+              topologyKey: kubernetes.io/hostname
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: compute
+                operator: In
+                values:
+                - frontdoor
+      tolerations:
+      - key: "nodeType"
+        operator: "Equal"
+        value: "frontdoor"
+        effect: "NoSchedule"
+      dnsConfig:
+        options:
+        - name: single-request-reopen
+        - name: ndots
+          value: "1"
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: echoserver
+        image: gcr.io/google_containers/echoserver:1.10
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        resources:
+          requests:
+            cpu: 2000m
+            memory: 2Gi
+          limits:
+            memory: 2Gi

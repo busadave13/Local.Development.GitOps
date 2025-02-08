@@ -1,0 +1,19 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: flagger-grafana
+  namespace: istio-system
+spec:
+  chart:
+    spec:
+      chart: flagger-grafana
+      interval: 2m # Check for new chart every 2 minutes
+      sourceRef:
+        kind: HelmRepository
+        name: flagger-grafana
+        namespace: istio-system
+  interval: 2m # Check for cluster drift every 2 minutes
+  releaseName: flagger-grafana
+  values:
+    namespace: istio-system
+    url:  http://prometheus:9090/ #http://prometheus-server.istio-system:9090/

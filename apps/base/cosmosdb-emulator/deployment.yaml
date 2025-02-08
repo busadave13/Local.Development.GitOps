@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cosmosdb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cosmosdb
+  template:
+    metadata:
+      labels:
+        app: cosmosdb
+    spec:
+      containers:
+        - name: cosmosdb
+          image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8081
+              name: port-8081
+            - containerPort: 8900
+              name: port-8900
+            - containerPort: 8902
+              name: port-8902
+            - containerPort: 10250
+              name: port-10250
+            - containerPort: 10251
+              name: port-10251
+            - containerPort: 10252
+              name: port-10252
+            - containerPort: 10253
+              name: port-10253
+            - containerPort: 10254
+              name: port-10254
+            - containerPort: 10255
+              name: port-10255
+            - containerPort: 10256
+              name: port-10256
+            - containerPort: 10350
+              name: port-10350
+          env:
+            - name: AZURE_COSMOS_EMULATOR_PARTITION_COUNT
+              value: "1"
+            - name: AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE
+              value: "true"
+          volumeMounts:
+            - mountPath: /CosmosDB.Emulator.IPC
+              name: cosmosdb-volume
+      volumes:
+        - name: cosmosdb-volume
+          persistentVolumeClaim:
+            claimName: cosmosdb-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cosmosdb-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

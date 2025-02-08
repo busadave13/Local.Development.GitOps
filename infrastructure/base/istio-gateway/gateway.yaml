@@ -1,0 +1,18 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: default-gateway
+  namespace: istio-ingress
+  annotations:
+    networking.istio.io/service-type: ClusterIP # Need to add this for minikube
+spec:
+  gatewayClassName: istio
+  listeners:
+  - name: http
+    port: 8080
+    protocol: HTTP
+    # hosts:
+    #   - "*/*.local"
+    allowedRoutes:
+      namespaces:
+        from: All

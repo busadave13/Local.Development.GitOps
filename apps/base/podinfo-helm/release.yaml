@@ -1,0 +1,23 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: podinfo
+spec:
+  chart:
+    spec:
+      chart: podinfo
+      version: "6.7.x"
+      interval: 24h # Check for new chart version
+      sourceRef:
+        kind: HelmRepository
+        name: podinfo
+  interval: 12h # Check for cluster drift
+  releaseName: podinfo
+  values:
+    replicaCount: 2
+    resources:
+      limits:
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 64Mi

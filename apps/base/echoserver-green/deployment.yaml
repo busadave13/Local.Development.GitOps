@@ -1,0 +1,83 @@
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: echoserver
+# spec:
+#   ports:
+#   - port: 8080
+#     protocol: TCP
+#     targetPort: 8080
+#   selector:
+#     run: echoserver
+# ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echoserver
+  labels:
+    app: echoserver
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 0
+  progressDeadlineSeconds: 600
+  selector:
+    matchLabels:
+      app: echoserver
+  template:
+    metadata:
+      labels:
+        app: echoserver
+      annotations:
+        xbs-type: "frontdoor"
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: role
+                  operator: In
+                  values:
+                  - echoserver
+              topologyKey: kubernetes.io/hostname
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: role
+                  operator: NotIn
+                  values:
+                  - echoserver
+              topologyKey: kubernetes.io/hostname
+      nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: compute
+                operator: In
+                values:
+                - frontdoor
+      tolerations:
+      - key: "nodeType"
+        operator: "Equal"
+        value: "frontdoor"
+        effect: "NoSchedule"
+      dnsConfig:
+        options:
+        - name: single-request-reopen
+        - name: ndots
+          value: "1"
+      terminationGracePeriodSeconds: 30 # sec
+      containers:
+      - name: echoserver
+        image: gcr.io/google_containers/echoserver:1.10
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP

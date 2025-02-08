@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: cosmosdb
+spec:
+  hosts:
+    - cosmosdb.local
+  gateways:
+    - istio-ingress/http-ingress-gateway
+  http:
+  - match:
+    - uri:
+        prefix: "/"
+    route:
+    - destination:
+        host: "cosmosdb.default.svc.cluster.local"
+        port:
+          number: 8081

@@ -1,54 +1,55 @@
 # Docker Desktop Dev Machine Setup
 
-This document describes how to set up a Docker Desktop development machine on Windows 11.
+This repository contains instuctions to setup a development machine to work with Docker Desktop and Kubernetes.
+It also provides gitops support using Flux to automate the deployment of Kubernetes resources.
 
 ## Prerequisites
 
 Run this command from an elevated PowerShell prompt.
 
-Install chocolatey package manager
+Install [chocolatey package manager](https://chocolatey.org/)
 
 ``` bash
 winget install chocolatey
 ```
 
-Install Git Bash
+Install [Git Bash](https://git-scm.com/)
 
 ``` bash
 choco install git
 ```
 
-Install Helm
+Install [Helm](https://helm.sh/)
 
 ``` bash
 choco install kubernetes-helm
 ```
 
-Install Flux
+Install [Flux](https://fluxcd.io/flux)
 
 ```bash
 choco install flux
 ```
 
-Install K9s
+Install [K9s](https://k9scli.io/)
 
 ```bash
 choco install k9s
 ```
 
-Install Slack
+Install [Slack](https://slack.com/)
 
 ```bash
 choco install slack
 ```
 
-Install Visual Studio Code
+Install [Visual Studio Code](https://code.visualstudio.com/)
 
 ```bash
 choco install vscode
 ```
 
-Install Node.js
+Install [Node.js](https://nodejs.org/)
 
 ```bash
 choco install nodejs
@@ -63,8 +64,9 @@ choco install nodejs
 
   ```bash
     [wsl2]
-    memory=8GB   # Limits VM memory in WSL 2 to 8 GB
-    processors=4 # Limits VM to use 4 virtual processors
+    memory=8GB                           # Max memmory
+    processors=4                         # Virtual CPUs
+    swap=8GB                             # Sets amount of swap storage space to 8GB, default is 25% of available RAM
   ```
 
   - Save the file and run the following command at the command prompt.
@@ -89,3 +91,22 @@ choco install nodejs
     docker-desktop   Ready    control-plane   10h   v1.31.4
   ```
   
+## Flux Setup
+
+Create environment variable named `GITHUB_TOKEN` with a personal access token.
+
+```bash
+export GITHUB_TOKEN=<personal-access-token>
+```
+
+Bootstrap the Flux repository.
+
+```bash
+flux bootstrap github \
+  --token-auth \
+  --owner=my-github-username \
+  --repository=https://github.com/busadave13/Local.Development.GitOps.git \
+  --branch=main \
+  --path=clusters/development \
+  --personal
+```

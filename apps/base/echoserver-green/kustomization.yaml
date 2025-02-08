@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: echoserver
+resources:
+  - namespace.yaml
+  - deploymentv2.yaml
+  - service.yaml
+  - virtualservice.yaml
+  - http-ingress-gateway.yaml

@@ -1,0 +1,22 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: prometheus
+  namespace: monitor
+spec:
+  releaseName: prometheus
+  interval: 2m # Check for cluster drift every 2 minutes
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      interval: 2m # Check for new chart every 2 minutes
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus
+        namespace: monitor
+  # install:
+  #   createNamespace: true
+  #   crds: Create
+  # upgrade:
+  #   crds: CreateReplace
+  #   cleanupOnFail: false

@@ -1,0 +1,32 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: kiali-operator
+  namespace: istio-system
+spec:
+  chart:
+    spec:
+      chart: kiali-operator
+      interval: 2m # Check for new chart every 2 minutes
+      sourceRef:
+        kind: HelmRepository
+        name: kiali
+        namespace: istio-system
+  interval: 2m # Check for cluster drift every 2 minutes
+  releaseName: kiali-operator
+  install:
+    createNamespace: true
+    crds: Create
+  upgrade:
+    crds: CreateReplace
+    cleanupOnFail: false
+  values:
+    external_services:
+      prometheus:
+        url: http://prometheus-server.istio-system:9090/
+    cr:
+      create: true
+      namespace: istio-system
+      spec:
+        auth:
+          strategy: "anonymous"

@@ -1,0 +1,9 @@
+resources:
+  - secret.yaml
+
+secretGenerator:
+  - name: mongo-creds
+    namespace: mongodb
+    literals:
+      - username=$(MONGO_USERNAME)
+      - password=$(MONGO_PASSWORD)
